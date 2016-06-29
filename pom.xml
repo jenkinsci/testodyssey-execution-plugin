@@ -3,10 +3,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.9</version><!-- which version of Jenkins is this plugin built against? -->
+        <version>2.9</version>
     </parent>
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
+        <jenkins.version>1.609.3</jenkins.version>
     </properties>
     <groupId>com.ekatechserv</groupId>
     <artifactId>testodyssey-execution</artifactId>
