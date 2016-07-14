@@ -30,7 +30,8 @@
       <connection>scm:git:https://github.com/jenkinsci/testodyssey-execution-plugin.git</connection>
       <developerConnection>scm:git:https://git@github.com/jenkinsci/testodyssey-execution-plugin.git</developerConnection>
       <url>https://github.com/jenkinsci/testodyssey-execution-plugin</url>
-    </scm>    
+      <tag>testodyssey-execution-1.0</tag>
+  </scm>    
     <developers>
         <developer>
             <id>ekateam</id>
