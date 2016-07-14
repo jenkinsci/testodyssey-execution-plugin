@@ -26,17 +26,12 @@
             <comments>All source code is under the MIT license.</comments>
         </license>
     </licenses>
-    <scm>
-      <connection>scm:git:https://github.com/jenkinsci/testodyssey-execution-plugin.git</connection>
-      <developerConnection>scm:git:https://git@github.com/jenkinsci/testodyssey-execution-plugin.git</developerConnection>
-      <url>https://github.com/jenkinsci/testodyssey-execution-plugin</url>
-    </scm>    
     <developers>
         <developer>
             <id>ekateam</id>
             <name>Sunil Kumar</name>
             <email>sunilkumar@ekatechserv.com</email>
-        </developer>        
+        </developer>
     </developers>      
     <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
     <repositories>
