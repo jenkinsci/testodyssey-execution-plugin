@@ -160,7 +160,7 @@ public class TestOdysseyBuilder extends Builder {
             if (this.getTestRun().getResult() == null) {
                 Date endDate = new Date();
                 long endTime = endDate.getTime();
-                long duration = Math.round((float) (endTime - startTime) / 60000);
+                long duration = Math.round((endTime - startTime) / 60000);
                 if (duration >= 5) {
                     throw new ExecutionRunException("No response from the server. Execution timedout after 5 minutes.");
                 }
@@ -220,6 +220,7 @@ public class TestOdysseyBuilder extends Builder {
         private String userId;
         private String password;
         private String orgShortCode;
+        private Execution execution;
         private ExecutionRun testRun;
         private HttpCommunicator communicator;
 
@@ -253,7 +254,7 @@ public class TestOdysseyBuilder extends Builder {
          */
         public FormValidation doCheckProjectName(@QueryParameter String value)
                 throws IOException, ServletException {
-            if (this.testRun == null || this.testRun.getProjectMap() == null || this.testRun.getProjectMap().isEmpty()) {
+            if(this.testRun == null || this.testRun.getProjectMap() == null || this.testRun.getProjectMap().isEmpty()){
                 return FormValidation.error("User credentials not provided in global configuration of Test Odyssey plugin or Test Odyssey server is down - contact support.");
             }
             if (value.length() == 0) {
@@ -311,7 +312,7 @@ public class TestOdysseyBuilder extends Builder {
         public FormValidation doCheckUserId(@QueryParameter String value)
                 throws IOException, ServletException {
             if (value.length() == 0) {
-                return FormValidation.error("Please provide userId configured as Test-Manager or Test-Engineer in Test-Odyssey.");
+                return FormValidation.error("Please provide userId as configured in Test-Odyssey.");
             }
             return FormValidation.ok();
         }
@@ -426,7 +427,7 @@ public class TestOdysseyBuilder extends Builder {
                 throw new FormException("Provide valid user credentials for Test-Odyssey plugin. Organization code missing.", orgShortCode);
             }
             communicator = HttpCommunicator.getInstance();
-            testRun = new ExecutionRun(communicator);
+            testRun = new ExecutionRun(this.getExecution(), communicator);
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setUseFrench)
             save();
@@ -450,6 +451,10 @@ public class TestOdysseyBuilder extends Builder {
 
         public String getOrgShortCode() {
             return orgShortCode;
+        }
+
+        public Execution getExecution() {
+            return execution;
         }
 
         public ExecutionRun getTestRun() {
