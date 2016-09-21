@@ -34,7 +34,7 @@ public class ExecutionRun {
     /**
      * Execution object sent to test-odyssey for starting a test-run
      */
-    private Execution execution;
+    private final Execution execution;
 
     /**
      * Result of the test-run returned from test-odyssey
@@ -46,10 +46,6 @@ public class ExecutionRun {
      * test-odyssey
      */
     private final HttpCommunicator communicator;
-
-    public ExecutionRun(HttpCommunicator communicator) {
-        this.communicator = communicator;
-    }
 
     public ExecutionRun(Execution execution, HttpCommunicator communicator) {
         this.execution = execution;
@@ -104,7 +100,7 @@ public class ExecutionRun {
             throw new ExecutionRunException("Test Odyssey Error : Exception processing projects returned from TestOdyssey ", ex);
         }
         if (MapUtils.isEmpty(this.getProjectMap())) {
-            throw new ExecutionRunException("Test Odyssey Error : Possible reasons - 1. Credentials provided are wrong  2. Role of the user is not Test-Engineer or Test-Manager in Test-Odyssey 3. No assigned project found in Test Odyssey for the given credentials");
+            throw new ExecutionRunException("Test Odyssey Error : Invalid credentials provided. No assigned project found in Test Odyssey for the given credentials.");
         }
         Logger.traceln("Exiting verifyUser" + this.getProjectMap().size());
         return MapUtils.isNotEmpty(this.getProjectMap());
