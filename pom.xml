@@ -11,7 +11,7 @@
     </properties>
     <groupId>com.ekatechserv</groupId>
     <artifactId>testodyssey-execution</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>hpi</packaging>
     <name>Test Odyssey Plugin for Jenkins</name>
     <description>Test Odyssey is a scriptless cloud based testing tool. This plugin enables users to trigger execution runs on Test Odyssey from Continuous Integration or Continuous Delivery setup on Jenkins.</description>
@@ -30,7 +30,7 @@
         <connection>scm:git:https://github.com/jenkinsci/testodyssey-execution-plugin.git</connection>
         <developerConnection>scm:git:https://git@github.com/jenkinsci/testodyssey-execution-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/testodyssey-execution-plugin</url>
-        <tag>test-odyssey-1.1</tag>
+        <tag>test-odyssey-plugin-1.1</tag>
     </scm>    
     <developers>
         <developer>
