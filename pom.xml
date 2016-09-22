@@ -27,11 +27,11 @@
         </license>
     </licenses>
     <scm>
-      <connection>scm:git:https://github.com/jenkinsci/testodyssey-execution-plugin.git</connection>
-      <developerConnection>scm:git:https://git@github.com/jenkinsci/testodyssey-execution-plugin.git</developerConnection>
-      <url>https://github.com/jenkinsci/testodyssey-execution-plugin</url>
-      <tag>testodyssey-execution-v1.2</tag>
-  </scm>    
+        <connection>scm:git:https://github.com/jenkinsci/testodyssey-execution-plugin.git</connection>
+        <developerConnection>scm:git:https://git@github.com/jenkinsci/testodyssey-execution-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/testodyssey-execution-plugin</url>
+        <tag>testodyssey-execution-v1.2</tag>
+    </scm>    
     <developers>
         <developer>
             <id>ekateam</id>
@@ -53,6 +53,13 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>jenkinsci-releases</name>
+            <url>https://repo.jenkins-ci.org/jenkinsci/releases</url>
+        </repository>
+    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
