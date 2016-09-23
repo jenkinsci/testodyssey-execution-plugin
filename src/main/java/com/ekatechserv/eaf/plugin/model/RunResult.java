@@ -3,6 +3,9 @@ package com.ekatechserv.eaf.plugin.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RunResult implements Serializable {
 
     /**

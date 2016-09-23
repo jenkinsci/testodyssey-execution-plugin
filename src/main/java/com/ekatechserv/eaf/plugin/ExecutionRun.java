@@ -104,7 +104,7 @@ public class ExecutionRun {
             throw new ExecutionRunException("Test Odyssey Error : Exception processing projects returned from TestOdyssey ", ex);
         }
         if (MapUtils.isEmpty(this.getProjectMap())) {
-            throw new ExecutionRunException("Test Odyssey Error : Invalid credentials provided. No assigned project found in Test Odyssey for the given credentials.");
+            throw new ExecutionRunException("Test Odyssey Error : Possible reasons - 1. Credentials provided are wrong  2. Role of the user is not Test-Engineer or Test-Manager in Test-Odyssey 3. No assigned project found in Test Odyssey for the given credentials 4. Organization licence is not premium");
         }
         Logger.traceln("Exiting verifyUser" + this.getProjectMap().size());
         return MapUtils.isNotEmpty(this.getProjectMap());
