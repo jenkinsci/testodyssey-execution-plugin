@@ -1,6 +1,5 @@
 package com.ekatechserv.eaf.plugin;
 
-import com.ekatechserv.eaf.plugin.model.Execution;
 import com.ekatechserv.eaf.plugin.model.ExecutionRunException;
 import com.ekatechserv.eaf.plugin.model.Logger;
 import com.ekatechserv.eaf.plugin.model.RunResult;
@@ -16,7 +15,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * ExecutionRun - refers to a build process of the Test-Odyssey plugin
@@ -28,13 +26,19 @@ public class ExecutionRun {
     private static final String VERIFY_USER_URL = "/jenkins/verifyUser.do";
     private static final String CREATE_EXECUTION_URL = "/jenkins/createExecution.do";
     private static final String CHECK_RESULT_STATUS_URL = "/jenkins/checkResultStatus.do?executionId=";
+    private static final String FETCH_ACTIVE_JOB_URL = "/jenkins/fetchActiveExecutionJob.do";
 
     private Map<String, String> projectMap;
 
     /**
-     * Execution object sent to test-odyssey for starting a test-run
+     * jobId of the test-run returned from test-odyssey
      */
-    private Execution execution;
+    private String jobId;
+
+    /**
+     * projectId of the test-run returned from test-odyssey
+     */
+    private String projectId;
 
     /**
      * Result of the test-run returned from test-odyssey
@@ -51,9 +55,10 @@ public class ExecutionRun {
         this.communicator = communicator;
     }
 
-    public ExecutionRun(Execution execution, HttpCommunicator communicator) {
-        this.execution = execution;
+    public ExecutionRun(HttpCommunicator communicator, String jobId, String projectId) {
         this.communicator = communicator;
+        this.projectId = projectId;
+        this.jobId = jobId;
     }
 
     public RunResult getResult() {
@@ -104,7 +109,7 @@ public class ExecutionRun {
             throw new ExecutionRunException("Test Odyssey Error : Exception processing projects returned from TestOdyssey ", ex);
         }
         if (MapUtils.isEmpty(this.getProjectMap())) {
-            throw new ExecutionRunException("Test Odyssey Error : Invalid credentials provided. No assigned project found in Test Odyssey for the given credentials.");
+            throw new ExecutionRunException("Test Odyssey Error : Possible reasons - 1. Credentials provided are wrong  2. Role of the user is not Test-Engineer or Test-Manager in Test-Odyssey 3. No assigned project found in Test Odyssey for the given credentials 4. Organization licence is not premium");
         }
         Logger.traceln("Exiting verifyUser" + this.getProjectMap().size());
         return MapUtils.isNotEmpty(this.getProjectMap());
@@ -119,15 +124,15 @@ public class ExecutionRun {
     public void createExecution() throws ExecutionRunException {
         Logger.traceln("Creating execution in test-odyssey");
         List<NameValuePair> fields = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            fields.add(new BasicNameValuePair("execution", mapper.writeValueAsString(this.execution)));
+            fields.add(new BasicNameValuePair("jobId", this.jobId));
+            fields.add(new BasicNameValuePair("projectId", this.projectId));
             HttpResponse response = this.communicator.doPost(CREATE_EXECUTION_URL, fields);
-            this.execution.setId(EntityUtils.toString(response.getEntity()));
+            this.jobId = EntityUtils.toString(response.getEntity());
         } catch (IOException ex) {
             throw new ExecutionRunException("Test Odyssey Error : Exception creating exeution run in TestOdyssey", ex);
         }
-        Logger.traceln("Execution created in test-odyssey with executionId : " + this.execution.getId());
+        Logger.traceln("Execution created in test-odyssey with executionId : " + this.jobId);
     }
 
     /**
@@ -137,7 +142,7 @@ public class ExecutionRun {
      * @throws ExecutionRunException
      */
     public void checkResultStatus() throws ExecutionRunException {
-        String uri = CHECK_RESULT_STATUS_URL + this.execution.getId();
+        String uri = CHECK_RESULT_STATUS_URL + this.jobId;
         HttpResponse response;
         try {
             response = this.communicator.doGet(uri);
@@ -160,5 +165,32 @@ public class ExecutionRun {
             throw new ExecutionRunException("Test Odyssey Error : Exception converting result returned from TestOdyssey", ex);
         }
         Logger.traceln("Result check : " + this.getResult());
+    }
+
+    /**
+     * fetch Active Execution Job options based on the projectId
+     *
+     * @param projectId
+     * @return
+     * @throws ExecutionRunException
+     */
+    public Map<String, String> fetchActiveExecutionJobs(String projectId) throws ExecutionRunException {
+        Map<String, String> activeJobs = null;
+        List<NameValuePair> fields = new ArrayList<>();
+        fields.add(new BasicNameValuePair("projectId", projectId));
+        HttpResponse response;
+        try {
+            response = this.communicator.doPost(FETCH_ACTIVE_JOB_URL, fields);
+        } catch (IOException ex) {
+            throw new ExecutionRunException("Test Odyssey Error : Exception connecting Url : " + FETCH_ACTIVE_JOB_URL, ex);
+        }
+        HttpEntity entity = response.getEntity();
+        try {
+            activeJobs = PluginUtil.convertEntityToMap(entity);
+        } catch (IOException ex) {
+            throw new ExecutionRunException("Test Odyssey Error : Exception fetching job returned from TestOdyssey ", ex);
+        }
+        Logger.traceln("Exiting fetchJenkinsExecutionActiveJobOptions" + activeJobs.size());
+        return activeJobs;
     }
 }
