@@ -1,11 +1,7 @@
 package com.ekatechserv.eaf.plugin;
 
-import com.ekatechserv.eaf.plugin.model.Browser;
-import com.ekatechserv.eaf.plugin.model.EnvModMapper;
-import com.ekatechserv.eaf.plugin.model.Execution;
 import com.ekatechserv.eaf.plugin.model.ExecutionRunException;
 import com.ekatechserv.eaf.plugin.model.Logger;
-import com.ekatechserv.eaf.plugin.model.OperatingSystem;
 import com.ekatechserv.eaf.plugin.model.RunResult;
 import hudson.Launcher;
 import hudson.Extension;
@@ -13,18 +9,21 @@ import hudson.util.FormValidation;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
+import hudson.model.Descriptor.FormException;
 import hudson.tasks.Builder;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -50,46 +49,27 @@ public class TestOdysseyBuilder extends Builder {
     private static final String RESULT_STATUS_COMPLETED = "Completed";
     private static final String RESULT_STATUS_NOT_STARTED = "Yet to start";
 
-    private final String execName;
-    private final String projectName;
-    private final String baseUrl;
-    private final String browserId;
-    private final String osId;
+    private final String jobId;
+    private final String projectId;
     private final String minPassPercentage;
-
     private final String loglevel;
-
-    private final Execution execution;
     private ExecutionRun testRun;
     private HttpCommunicator communicator;
 
     @DataBoundConstructor
-    public TestOdysseyBuilder(String execName, String projectName, String baseUrl, String browserId, String osId, String minPassPercentage) {
-        this.execName = execName;
-        this.projectName = projectName;
-        this.baseUrl = baseUrl;
-        this.browserId = browserId;
-        this.osId = osId;
+    public TestOdysseyBuilder(String jobId, String projectId, String minPassPercentage) {
+        this.jobId = jobId;
+        this.projectId = projectId;
         this.minPassPercentage = minPassPercentage;
         this.loglevel = "normal";
-        this.execution = new Execution(execName);
-        EnvModMapper mapper = new EnvModMapper(osId, browserId, baseUrl);
-        this.execution.setEnvMods(Arrays.asList(mapper));
-        this.execution.setExecutionType("559e9995ca1f05adcaff70ca");//sequential
-        this.execution.setOrgShortCode(this.getDescriptor().getOrgShortCode());
-        this.execution.setUserId(this.getDescriptor().getUserId());
     }
 
-    public String getProjectName() {
-        return projectName;
+    public String getProjectId() {
+        return projectId;
     }
 
     public String getLoglevel() {
         return loglevel;
-    }
-
-    public Execution getExecution() {
-        return execution;
     }
 
     public ExecutionRun getTestRun() {
@@ -104,20 +84,8 @@ public class TestOdysseyBuilder extends Builder {
         return minPassPercentage;
     }
 
-    public String getExecName() {
-        return execName;
-    }
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public String getBrowserId() {
-        return browserId;
-    }
-
-    public String getOsId() {
-        return osId;
+    public String getJobId() {
+        return jobId;
     }
 
     @Override
@@ -126,8 +94,7 @@ public class TestOdysseyBuilder extends Builder {
         Logger.info("Test Odyssey process started !!");
         Logger.traceln("Inside builder.perform method - build started");
         communicator = HttpCommunicator.getInstance();
-        this.getExecution().setProjectId(this.getProjectName());
-        testRun = new ExecutionRun(this.getExecution(), this.getCommunicator());
+        testRun = new ExecutionRun(this.getCommunicator(), this.getJobId(), this.getProjectId());
         try {
             verifyUserAndGetProjectMap(testRun);
             testRun.createExecution();
@@ -225,7 +192,7 @@ public class TestOdysseyBuilder extends Builder {
         private HttpCommunicator communicator;
 
         /**
-         * Performs on-the-fly validation of the form field 'execName'.
+         * Performs on-the-fly validation of the form field 'jobId'.
          *
          * @param value This parameter receives the value that the user has
          * typed.
@@ -234,16 +201,19 @@ public class TestOdysseyBuilder extends Builder {
          * @throws java.io.IOException
          * @throws javax.servlet.ServletException
          */
-        public FormValidation doCheckExecName(@QueryParameter String value)
+        public FormValidation doCheckJobId(@QueryParameter String value)
                 throws IOException, ServletException {
             if (value.length() == 0) {
-                return FormValidation.error("Please provide an execution name");
+                return FormValidation.error("Please select a job name");
+            }
+            if (value.equalsIgnoreCase("Empty")) {
+                return FormValidation.error("Please configure job in test odyssey with trigger type as By job");
             }
             return FormValidation.ok();
         }
 
         /**
-         * Performs on-the-fly validation of the form field 'projectName'.
+         * Performs on-the-fly validation of the form field 'projectId'.
          *
          * @param value This parameter receives the value that the user has
          * typed.
@@ -252,31 +222,13 @@ public class TestOdysseyBuilder extends Builder {
          * @throws java.io.IOException
          * @throws javax.servlet.ServletException
          */
-        public FormValidation doCheckProjectName(@QueryParameter String value)
+        public FormValidation doCheckProjectId(@QueryParameter String value)
                 throws IOException, ServletException {
             if (this.testRun == null || this.testRun.getProjectMap() == null || this.testRun.getProjectMap().isEmpty()) {
                 return FormValidation.error("User credentials not provided in global configuration of Test Odyssey plugin or Test Odyssey server is down - contact support.");
             }
             if (value.length() == 0) {
-                return FormValidation.error("Please provide project name as configured in Test-Odyssey.");
-            }
-            return FormValidation.ok();
-        }
-
-        /**
-         * Performs on-the-fly validation of the form field 'baseUrl'.
-         *
-         * @param value This parameter receives the value that the user has
-         * typed.
-         * @return Indicates the outcome of the validation. This is sent to the
-         * browser.
-         * @throws java.io.IOException
-         * @throws javax.servlet.ServletException
-         */
-        public FormValidation doCheckBaseUrl(@QueryParameter String value)
-                throws IOException, ServletException {
-            if (value.length() == 0) {
-                return FormValidation.error("Please provide base url of the application to test.");
+                return FormValidation.error("Please provide userId as Test-Manager or Test-Engineer configured in Test-Odyssey.");
             }
             return FormValidation.ok();
         }
@@ -294,7 +246,7 @@ public class TestOdysseyBuilder extends Builder {
         public FormValidation doCheckMinPassPercentage(@QueryParameter String value)
                 throws IOException, ServletException {
             if (value.length() == 0) {
-                return FormValidation.error("Please provide minimum pass percentage to pass the build.");
+                return FormValidation.error("Please provide minimum pass percentage or the build to pass.");
             }
             return FormValidation.ok();
         }
@@ -330,7 +282,7 @@ public class TestOdysseyBuilder extends Builder {
         public FormValidation doCheckPassword(@QueryParameter String value)
                 throws IOException, ServletException {
             if (value.length() == 0) {
-                return FormValidation.error("Please provide password as configured in Test-Odyssey for the provided userId.");
+                return FormValidation.error("Please provide password as configured in Test-Odyssey for the given userId.");
             }
             return FormValidation.ok();
         }
@@ -359,36 +311,39 @@ public class TestOdysseyBuilder extends Builder {
          *
          * @return ListBoxModel list of all projects user is associated with
          */
-        public ListBoxModel doFillProjectNameItems() {
+        public ListBoxModel doFillProjectIdItems() {
             ListBoxModel items = new ListBoxModel();
             for (Map.Entry<String, String> entry : testRun.getProjectMap().entrySet()) {
                 items.add(entry.getKey(), entry.getValue());
             }
-            return items;
-        }
-
-        /**
-         * Builds the OS list to be displayed in the OS dropdown.
-         *
-         * @return ListBoxModel OS list
-         */
-        public ListBoxModel doFillOsIdItems() {
-            ListBoxModel items = new ListBoxModel();
-            for (Map.Entry<String, String> entry : OperatingSystem.getOsMap().entrySet()) {
-                items.add(entry.getValue(), entry.getKey());
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.get(0).selected = true;
             }
             return items;
         }
 
         /**
-         * Builds the browser list to be displayed in the browser dropdown.
+         * Builds the job list for the user-credentials provided to be displayed
+         * in the execution dropdown. display empty dropdown on the document
+         * ready
          *
-         * @return ListBoxModel browser list
+         * @param projectId from javadocs
+         * @return ListBoxModel list of all jobs user is associated with
+         * @throws com.ekatechserv.eaf.plugin.model.ExecutionRunException
          */
-        public ListBoxModel doFillBrowserIdItems() {
+        public ListBoxModel doFillJobIdItems(@QueryParameter String projectId) throws ExecutionRunException {
             ListBoxModel items = new ListBoxModel();
-            for (Map.Entry<String, String> entry : Browser.getBrowserMap().entrySet()) {
-                items.add(entry.getValue(), entry.getKey());
+            Map<String, String> jobOptions = testRun.fetchActiveExecutionJobs(projectId);
+            if (MapUtils.isEmpty(jobOptions)) {
+                Option option = new Option("", "Empty", true);
+                items.add(option);
+                return items;
+            }
+            for (Map.Entry<String, String> entrySet : jobOptions.entrySet()) {
+                items.add(entrySet.getValue(), entrySet.getKey());
+            }
+            if (CollectionUtils.isNotEmpty(items)) {
+                items.get(0).selected = true;
             }
             return items;
         }
@@ -460,6 +415,5 @@ public class TestOdysseyBuilder extends Builder {
         public HttpCommunicator getCommunicator() {
             return communicator;
         }
-
     }
 }

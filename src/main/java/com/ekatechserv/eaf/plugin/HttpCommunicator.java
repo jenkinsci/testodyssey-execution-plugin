@@ -24,7 +24,10 @@ public class HttpCommunicator {
     private final CloseableHttpClient client;
 
     private final static String USER_AGENT = "Mozilla/5.0";
+
     private final static String TEST_ODYSSEY_URL = "http://test-odyssey.com";
+//    private final static String TEST_ODYSSEY_URL = "http://192.168.1.200:6060/eaf";
+//    private final static String TEST_ODYSSEY_URL = "http://ekatechserv.co.in";
 
     public static HttpCommunicator getInstance() {
         if (instance == null) {

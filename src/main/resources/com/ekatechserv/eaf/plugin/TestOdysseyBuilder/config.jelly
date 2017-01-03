@@ -9,23 +9,17 @@
     <!--
       Creates a text field that shows the value of the "name" property.
       When submitted, it will be passed to the corresponding constructor parameter.
+      
     -->
-    <f:entry title="Execution Name" field="execName">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title=" Project " field="projectName">
-        <f:select/>
-    </f:entry>
-    <f:entry title="Operating System" field="osId">
-        <f:select/>
-    </f:entry>
-    <f:entry title="Browser" field="browserId">
-        <f:select/>
-    </f:entry>
-    <f:entry title="AUT Base URL" field="baseUrl">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="Min. Pass Percentage" field="minPassPercentage">
-        <f:textbox/>
-    </f:entry>           
+    <div class="sonar-section">
+        <f:entry title=" Project " field="projectId">
+            <f:select/>
+        </f:entry>
+        <f:entry title="Name" field="jobId">
+            <f:select/>
+        </f:entry>
+        <f:entry title="Min. Pass Percentage" field="minPassPercentage">
+            <f:textbox/>
+        </f:entry>
+    </div>
 </j:jelly>
