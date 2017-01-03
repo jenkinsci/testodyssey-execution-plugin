@@ -83,19 +83,19 @@ public class RunResult implements Serializable {
     }
 
     public Date getStartTime() {
-        return startTime;
+        return  new Date(startTime.getTime());
     }
 
     public void setStartTime(Date startTime) {
-        this.startTime = startTime;
+        this.startTime =  new Date(startTime.getTime());
     }
 
     public Date getEndTime() {
-        return endTime;
+        return  new Date(endTime.getTime());
     }
 
     public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+        this.endTime =  new Date(endTime.getTime());
     }
 
     public long getDuration() {

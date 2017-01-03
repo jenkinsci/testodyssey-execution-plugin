@@ -34,7 +34,7 @@ public class ExecutionRun {
     /**
      * Execution object sent to test-odyssey for starting a test-run
      */
-    private final Execution execution;
+    private Execution execution;
 
     /**
      * Result of the test-run returned from test-odyssey
@@ -46,6 +46,10 @@ public class ExecutionRun {
      * test-odyssey
      */
     private final HttpCommunicator communicator;
+
+    public ExecutionRun(HttpCommunicator communicator) {
+        this.communicator = communicator;
+    }
 
     public ExecutionRun(Execution execution, HttpCommunicator communicator) {
         this.execution = execution;
