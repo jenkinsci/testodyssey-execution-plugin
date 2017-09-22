@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -94,6 +95,8 @@ public class TestOdysseyBuilder extends Builder {
         Logger.info("Test Odyssey process started !!");
         Logger.traceln("Inside builder.perform method - build started");
         communicator = HttpCommunicator.getInstance();
+        String url = StringUtils.isEmpty(this.getDescriptor().getUrl()) ? HttpCommunicator.TEST_ODYSSEY_URL : this.getDescriptor().getUrl();
+        communicator.setUrl(url);
         testRun = new ExecutionRun(this.getCommunicator(), this.getJobId(), this.getProjectId());
         try {
             verifyUserAndGetProjectMap(testRun);
@@ -188,6 +191,7 @@ public class TestOdysseyBuilder extends Builder {
         private String userId;
         private String password;
         private String orgShortCode;
+        private String url;
         private ExecutionRun testRun;
         private HttpCommunicator communicator;
 
@@ -228,7 +232,7 @@ public class TestOdysseyBuilder extends Builder {
                 return FormValidation.error("User credentials not provided in global configuration of Test Odyssey plugin or Test Odyssey server is down - contact support.");
             }
             if (value.length() == 0) {
-                return FormValidation.error("Please provide userId as Test-Manager or Test-Engineer configured in Test-Odyssey.");
+                return FormValidation.error("Please Select a Project.");
             }
             return FormValidation.ok();
         }
@@ -301,6 +305,28 @@ public class TestOdysseyBuilder extends Builder {
                 throws IOException, ServletException {
             if (value.length() == 0) {
                 return FormValidation.error("Please provide organization code as provided by Test-Odyssey.");
+            }
+            return FormValidation.ok();
+        }
+
+        /**
+         * Performs on-the-fly validation of the form field 'url'.
+         *
+         * @param value This parameter receives the value that the user has
+         * typed.
+         * @return Indicates the outcome of the validation. This is sent to the
+         * browser.
+         * @throws java.io.IOException
+         * @throws javax.servlet.ServletException
+         */
+        public FormValidation doCheckUrl(@QueryParameter String value)
+                throws IOException, ServletException {
+            if (value.length() != 0) {
+                String[] schemes = {"http", "https"};
+                UrlValidator urlValidator = new UrlValidator(schemes);
+                if (!urlValidator.isValid(value)) {
+                    return FormValidation.error("Please provide valid url Pattern.");
+                }
             }
             return FormValidation.ok();
         }
@@ -382,6 +408,9 @@ public class TestOdysseyBuilder extends Builder {
                 throw new FormException("Provide valid user credentials for Test-Odyssey plugin. Organization code missing.", orgShortCode);
             }
             communicator = HttpCommunicator.getInstance();
+            this.url = formData.getString("url");
+            this.url = StringUtils.isEmpty(this.url) ? HttpCommunicator.TEST_ODYSSEY_URL : this.url;
+            communicator.setUrl(this.url);
             testRun = new ExecutionRun(communicator);
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setUseFrench)
@@ -406,6 +435,10 @@ public class TestOdysseyBuilder extends Builder {
 
         public String getOrgShortCode() {
             return orgShortCode;
+        }
+
+        public String getUrl() {
+            return url;
         }
 
         public ExecutionRun getTestRun() {
