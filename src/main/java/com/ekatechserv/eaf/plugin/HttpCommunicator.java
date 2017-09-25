@@ -13,9 +13,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 /**
- * HttpCommunicator a singleton class.
- * Communicates with Test-Odyssey using HttpComponent api.
- * 
+ * HttpCommunicator a singleton class. Communicates with Test-Odyssey using
+ * HttpComponent api.
+ *
  * @author Eka Techserv
  */
 public class HttpCommunicator {
@@ -25,9 +25,19 @@ public class HttpCommunicator {
 
     private final static String USER_AGENT = "Mozilla/5.0";
 
-    private final static String TEST_ODYSSEY_URL = "http://test-odyssey.com";
-//    private final static String TEST_ODYSSEY_URL = "http://192.168.1.200:6060/eaf";
-//    private final static String TEST_ODYSSEY_URL = "http://ekatechserv.co.in";
+    public final static String TEST_ODYSSEY_URL = "http://test-odyssey.com";
+    //  public final static String TEST_ODYSSEY_URL = "http://192.168.1.200:6060/eaf";
+//    public final static String TEST_ODYSSEY_URL = "http://ekatechserv.co.in";
+
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
     public static HttpCommunicator getInstance() {
         if (instance == null) {
@@ -41,14 +51,14 @@ public class HttpCommunicator {
     }
 
     public HttpResponse doPost(String actionUri, List<NameValuePair> fields) throws UnsupportedEncodingException, IOException {
-        HttpPost httpPost = new HttpPost(TEST_ODYSSEY_URL + actionUri);
+        HttpPost httpPost = new HttpPost(this.getUrl() + actionUri);
         httpPost.setEntity(new UrlEncodedFormEntity(fields, StandardCharsets.UTF_8));
         httpPost.addHeader("User-Agent", USER_AGENT);
         return client.execute(httpPost);
     }
 
     public HttpResponse doGet(String actionUri) throws IOException {
-        HttpGet httpGet = new HttpGet(TEST_ODYSSEY_URL + actionUri);
+        HttpGet httpGet = new HttpGet(this.getUrl() + actionUri);
         httpGet.addHeader("User-Agent", USER_AGENT);
         return client.execute(httpGet);
     }
