@@ -1,4 +1,0 @@
- <?jelly escape-by-default='true'?>
-<div>
-  This plugin enables users to trigger execution runs on Test Odyssey from Continuous Integration or Continuous Delivery setup on Jenkins.
-</div>
