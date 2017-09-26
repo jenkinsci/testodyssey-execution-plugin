@@ -11,7 +11,7 @@
     </properties>
     <groupId>com.ekatechserv</groupId>
     <artifactId>testodyssey-execution</artifactId>
-    <version>2.2.2-SNAPSHOT</version>
+    <version>5.0.2-SNAPSHOt</version>
     <packaging>hpi</packaging>
     <name>Test Odyssey Plugin for Jenkins</name>
     <description>Test Odyssey is a scriptless cloud based testing tool. This plugin enables users to trigger execution runs on Test Odyssey from Continuous Integration or Continuous Delivery setup on Jenkins.</description>
